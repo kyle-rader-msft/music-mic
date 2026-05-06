@@ -118,11 +118,11 @@ pub fn GainSlider(value: f32, on_change: EventHandler<f32>) -> Element {
 pub fn Card(label: Option<String>, children: Element) -> Element {
     rsx! {
         section {
-            class: "rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm \
+            class: "rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm \
                     dark:border-zinc-800 dark:bg-zinc-900/60 dark:shadow-none",
             if let Some(label) = label {
                 div {
-                    class: "mb-3 text-[11px] font-semibold uppercase tracking-wider \
+                    class: "mb-2 text-[11px] font-semibold uppercase tracking-wider \
                             text-zinc-500 dark:text-zinc-400",
                     "{label}"
                 }

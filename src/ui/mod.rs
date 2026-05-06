@@ -23,7 +23,7 @@ pub fn App() -> Element {
             class: "min-h-screen w-full bg-gradient-to-b from-zinc-50 to-zinc-100 \
                     text-zinc-900 \
                     dark:from-zinc-950 dark:to-zinc-900 dark:text-zinc-100",
-            div { class: "mx-auto max-w-2xl px-6 pt-8 pb-12 space-y-6",
+            div { class: "mx-auto max-w-md px-5 pt-5 pb-6 space-y-4",
                 Header {
                     show_setup: show_setup(),
                     on_toggle: move |_| show_setup.set(!show_setup()),
@@ -44,14 +44,14 @@ pub fn App() -> Element {
 #[component]
 fn Header(show_setup: bool, on_toggle: EventHandler<MouseEvent>) -> Element {
     rsx! {
-        header { class: "flex items-start justify-between gap-4",
-            div {
+        header { class: "flex items-start justify-between gap-3",
+            div { class: "min-w-0",
                 h1 {
-                    class: "text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50",
+                    class: "text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50",
                     "music-mic"
                 }
-                p { class: "mt-1 text-sm text-zinc-600 dark:text-zinc-400",
-                    "Mix your microphone with the audio of any app into a virtual mic for Teams."
+                p { class: "mt-0.5 text-xs leading-snug text-zinc-600 dark:text-zinc-400",
+                    "Mix your mic with any app's audio into a virtual mic for Teams."
                 }
             }
             Button {

@@ -103,7 +103,7 @@ pub fn MainView(engine: Signal<AudioEngine>) -> Element {
     };
 
     rsx! {
-        div { class: "space-y-4",
+        div { class: "space-y-3",
             // ---- Microphone ----
             SourceCard {
                 title: "Microphone",
@@ -132,7 +132,7 @@ pub fn MainView(engine: Signal<AudioEngine>) -> Element {
                     Switch {
                         checked: mic_voice(),
                         label: "Voice isolation",
-                        hint: Some("Cleans the mic before mixing — leave Teams' isolation off so music isn't suppressed.".to_string()),
+                        hint: Some("Cleans mic before mixing — leave Teams' isolation off.".to_string()),
                         on_toggle: move |on: bool| {
                             mic_voice.set(on);
                             engine.read().state().mic_voice_processing.store(on, Ordering::Relaxed);
@@ -193,11 +193,11 @@ pub fn MainView(engine: Signal<AudioEngine>) -> Element {
                         " then restart."
                     }
                 }
-                div { class: "mt-3", Meter { peak: mas_lvl().0, rms: mas_lvl().1 } }
+                div { class: "mt-2.5", Meter { peak: mas_lvl().0, rms: mas_lvl().1 } }
             }
 
             // ---- Control + footer ----
-            div { class: "flex flex-col items-center gap-3 pt-1",
+            div { class: "flex flex-col items-center gap-2",
                 if is_running() {
                     Button { variant: ButtonVariant::Danger, onclick: on_stop, "Stop" }
                 } else {
@@ -208,12 +208,12 @@ pub fn MainView(engine: Signal<AudioEngine>) -> Element {
                         "Start mixing"
                     }
                 }
-                p { class: "text-center text-xs leading-6 text-zinc-500 dark:text-zinc-400 max-w-md",
-                    "In Teams: Settings → Devices → Microphone → "
+                p { class: "text-center text-xs leading-snug text-zinc-500 dark:text-zinc-400",
+                    "In Teams: Microphone → "
                     span { class: "font-medium text-zinc-700 dark:text-zinc-300",
                         "{BLACKHOLE_DEVICE_NAME}"
                     }
-                    ". Keep your speakers as the playback device so you can still hear your music."
+                    ". Keep speakers as your playback device to still hear your music."
                 }
             }
         }
@@ -232,13 +232,13 @@ fn SourceCard(
 ) -> Element {
     rsx! {
         Card { label: title,
-            div { class: "space-y-3",
+            div { class: "space-y-2.5",
                 {picker}
                 Meter { peak: meter_peak, rms: meter_rms }
                 GainSlider { value: gain, on_change: on_gain }
                 if let Some(f) = footer {
                     div {
-                        class: "mt-1 pt-3 border-t border-zinc-200/70 dark:border-zinc-800/70",
+                        class: "pt-2.5 border-t border-zinc-200/70 dark:border-zinc-800/70",
                         {f}
                     }
                 }
