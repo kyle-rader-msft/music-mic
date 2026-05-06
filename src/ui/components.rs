@@ -1,22 +1,88 @@
 use dioxus::prelude::*;
 
-/// Horizontal level meter with a gradient RMS bar and a thin peak marker.
+/// Lower bound of the meter's dBFS window. Anything quieter pegs at 0% width.
+const METER_MIN_DBFS: f32 = -60.0;
+
+/// Convert a linear amplitude in `[0, 1+]` to a meter percentage on a
+/// `METER_MIN_DBFS..0` dBFS scale.
+///
+/// A linear meter looks broken for normal voice/music: peaks land around
+/// -10 dB (≈ 0.3 amplitude) which is only a third of the bar. A dB scale
+/// matches what every pro audio meter does and makes meaningful movement
+/// visible.
+fn amp_to_db_pct(amp: f32) -> f32 {
+    // log10(0) is -inf; clamp the floor so the math is well-defined.
+    let amp = amp.max(1e-6);
+    let db = 20.0 * amp.log10();
+    let normalized = ((db - METER_MIN_DBFS) / -METER_MIN_DBFS).clamp(0.0, 1.0);
+    normalized * 100.0
+}
+
+/// Horizontal level meter with a dB-scaled gradient RMS bar and a thin peak
+/// marker.
+///
+/// The gradient lives on a fixed full-width layer that sits behind the track;
+/// `clip-path` reveals only the portion up to the current RMS level. That way
+/// the gradient stops correspond to *absolute* dB positions on the scale —
+/// the bar's color genuinely indicates level (green = safe, amber = hot,
+/// red = clipping) rather than always fading from green to red regardless of
+/// loudness.
 #[component]
 pub fn Meter(peak: f32, rms: f32) -> Element {
-    let peak_pct = (peak.clamp(0.0, 1.0) * 100.0).round() as i32;
-    let rms_pct = (rms.clamp(0.0, 1.0) * 100.0).round() as i32;
+    let peak_pct = amp_to_db_pct(peak);
+    let rms_pct = amp_to_db_pct(rms);
+    let clip_right = (100.0 - rms_pct).max(0.0);
+
+    // Gradient stops are positioned on the dB axis: green safe zone holds
+    // until ~ -12 dB (80% of the bar), amber takes over at -5 dB (~92%),
+    // red bites only on the last ~3 dB.
+    let gradient = "linear-gradient(to right, \
+        #10b981 0%, #10b981 80%, \
+        #fbbf24 92%, \
+        #f43f5e 100%)";
+
     rsx! {
         div {
             class: "relative h-1.5 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800",
             div {
-                class: "absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 transition-[width] duration-75 ease-linear",
-                style: "width: {rms_pct}%;",
+                class: "absolute inset-0 transition-[clip-path] duration-75 ease-linear",
+                style: "background-image: {gradient}; clip-path: inset(0 {clip_right:.2}% 0 0);",
             }
             div {
                 class: "absolute inset-y-0 w-0.5 bg-zinc-900/85 dark:bg-zinc-100/90 transition-[left] duration-75 ease-linear",
-                style: "left: {peak_pct}%;",
+                style: "left: {peak_pct:.2}%;",
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn approx(a: f32, b: f32) -> bool {
+        (a - b).abs() < 0.5
+    }
+
+    #[test]
+    fn db_scale_endpoints_clamp() {
+        // 0 dBFS → 100% (full scale).
+        assert!(approx(amp_to_db_pct(1.0), 100.0));
+        // < METER_MIN_DBFS → 0%.
+        assert!(approx(amp_to_db_pct(0.0), 0.0));
+        assert!(approx(amp_to_db_pct(1e-9), 0.0));
+        // Above full scale clamps to 100%.
+        assert!(approx(amp_to_db_pct(2.5), 100.0));
+    }
+
+    #[test]
+    fn db_scale_speech_levels_are_visible() {
+        // -10 dB ≈ 0.316 amplitude — typical speech peak. Should be deep into
+        // the bar (>80%), unlike the linear scale's 32%.
+        assert!(amp_to_db_pct(0.316) > 80.0);
+        // -30 dB ≈ 0.0316 amplitude — soft speech RMS. Should still be
+        // visible (~50% of bar) instead of vanishing at 3% on a linear scale.
+        assert!(amp_to_db_pct(0.0316) > 45.0);
     }
 }
 
