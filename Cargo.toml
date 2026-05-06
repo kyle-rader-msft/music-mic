@@ -1,0 +1,38 @@
+[package]
+name = "music-mic"
+version = "0.1.0"
+edition = "2024"
+description = "Mix microphone with per-app system audio into a virtual microphone (BlackHole) for Microsoft Teams."
+publish = false
+
+[dependencies]
+dioxus = { version = "0.7", features = ["desktop"] }
+cpal = "0.17"
+rtrb = "0.3"
+crossbeam-channel = "0.5"
+parking_lot = "0.12"
+rubato = "0.16"
+anyhow = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# RNNoise port for voice isolation on the mic side. Mono, 480-sample frames
+# at 48 kHz — slots into our pipeline.
+nnnoiseless = "0.5"
+# Sample-format conversion trait used in the int-mic paths.
+dasp_sample = "0.11"
+# Dioxus desktop already pulls in a tokio runtime; we only need time::sleep.
+tokio = { version = "1", default-features = false, features = ["time"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "6"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# macos_13_0 enables ScreenCaptureKit audio capture (required).
+screencapturekit = { version = "2", features = ["macos_13_0"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"

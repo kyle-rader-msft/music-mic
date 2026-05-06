@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Tell Tailwind v4 where to scan for classes — Rust source files. */
+@source "./**/*.rs";
+
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui,
+    sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
+
+  /* Brand accent — a notch warmer than blue-500 to feel less generic. */
+  --color-brand-50:  oklch(0.97 0.02 245);
+  --color-brand-100: oklch(0.92 0.05 245);
+  --color-brand-300: oklch(0.78 0.13 245);
+  --color-brand-500: oklch(0.62 0.18 245);
+  --color-brand-600: oklch(0.55 0.20 245);
+  --color-brand-700: oklch(0.48 0.18 245);
+}
+
+/* Native form controls track the theme. */
+:root { color-scheme: light dark; }
+
+/* WebView default body has 8px margin — kill it so layouts hit the edges. */
+html, body, #main { margin: 0; padding: 0; height: 100%; }
+
+/* Subtle smoothing — desktop apps look chunky without this. */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-sans);
+}
+
+/* Range input — tailwind doesn't restyle these by default; give them an
+   accent that matches both themes. */
+input[type="range"] { accent-color: var(--color-brand-500); }
