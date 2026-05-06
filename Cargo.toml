@@ -3,6 +3,9 @@ name = "music-mic"
 version = "0.1.0"
 edition = "2024"
 description = "Mix microphone with per-app system audio into a virtual microphone (BlackHole) for Microsoft Teams."
+license = "MIT"
+repository = "https://github.com/kyle-rader-msft/music-mic"
+readme = "README.md"
 publish = false
 
 [dependencies]
